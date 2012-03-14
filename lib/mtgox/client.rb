@@ -187,8 +187,8 @@ module MtGox
     # @example
     #   # Sell one bitcoin for $100
     #   MtGox.sell! 1.0, 100.0
-    def sell!(amount, price)
-      parse_orders(post('/api/0/sellBTC.php', {:amount => amount, :price => price})['orders'])
+    def sell!(amount, price = nil, currency = "USD") 
+      parse_orders(post('/api/0/sellBTC.php', {:amount => amount, :price => price, :currency => currency})['orders'])
     end
 
     # Cancel an open order

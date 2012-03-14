@@ -222,14 +222,14 @@ describe MtGox::Client do
 
   describe "#sell!" do
     before do
-      body = test_body({"amount" => "0.88", "price" => "89.0"})
+      body = test_body({"amount" => "0.88", "price" => "89.0", "currency" => "USD"})
       stub_post('/api/0/sellBTC.php').
         with(:body => body, :headers => test_headers(body)).
         to_return(:status => 200, :body => fixture('sell.json'))
     end
 
     it "should place an ask" do
-      body = test_body({"amount" => "0.88", "price" => "89.0"})
+      body = test_body({"amount" => "0.88", "price" => "89.0", "currency" => "USD"})
       sell = @client.sell!(0.88, 89.0)
       a_post("/api/0/sellBTC.php").
         with(:body => body, :headers => test_headers(body)).
@@ -238,6 +238,32 @@ describe MtGox::Client do
       sell[:buys].last.date.should == Time.utc(2011, 6, 27, 18, 26, 21)
       sell[:sells].last.price.should == 200
       sell[:sells].last.date.should == Time.utc(2011, 6, 27, 18, 27, 54)
+    end
+
+    it "should be able to omit a sell price" do
+      body = test_body({"amount" => "0.88", "price" => "", "currency" => "USD"})
+      stub_post('/api/0/sellBTC.php').
+        with(:body => body, :headers => test_headers(body)).
+        to_return(:status => 200, :body => fixture('sell.json'))
+
+      body = test_body({"amount" => "0.88", "price" => "", "currency" => "USD"})
+      sell = @client.sell!(0.88)
+      a_post("/api/0/sellBTC.php").
+        with(:body => body, :headers => test_headers(body)).
+        should have_been_made
+    end
+
+    it "should be able to specify a currency" do
+      body = test_body({"amount" => "0.88", "price" => "", "currency" => "EUR"})
+      stub_post('/api/0/sellBTC.php').
+        with(:body => body, :headers => test_headers(body)).
+        to_return(:status => 200, :body => fixture('sell.json'))
+
+      body = test_body({"amount" => "0.88", "price" => "", "currency" => "EUR"})
+      sell = @client.sell!(0.88, nil, "EUR")
+      a_post("/api/0/sellBTC.php").
+        with(:body => body, :headers => test_headers(body)).
+        should have_been_made
     end
   end
 
